@@ -4,7 +4,7 @@ from PIL import Image, ImageOps, ImageDraw, ImageFont
 from redbot.core.data_manager import bundled_data_path
 from redbot.core.bot import Red
 from io import BytesIO
-from random import choices, choice
+from random import sample, choice
 from os import listdir
 from .textwrapper import TextWrapper
 
@@ -45,7 +45,7 @@ class Weeedbot(commands.Cog):
         authors = list(set([m.author.id for m in messages]))
         # Next up, get a specified number of characters
         chars = listdir(f"{self.datapath}/char")
-        actors = choices(chars, k=len(authors))
+        actors = sample(chars, k=len(authors))
         # And then we create a dictioary of actors for authors
         actorMap = dict(zip(authors, actors))
         # At this point we should have all the necessary data
