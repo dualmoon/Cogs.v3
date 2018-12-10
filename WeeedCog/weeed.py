@@ -33,12 +33,23 @@ class Weeedbot(commands.Cog):
             pass
 
     @weeed.command()
-    async def comic(self, ctx: commands.Context, count: int):
+    async def comic(self, ctx: commands.Context, count: int, messageID: int=None):
         if count > 10:
             await ctx.send("Whoa, shitlord. You expect me to parse _All That Shit_ by _you_?")
             return
+        elif count < 1:
+            await ctx.send("Nice try there ;-]")
+            return
+        elif count not in range(1,11):
+            await ctx.send("What to heck are u doin??? The number needs to be between 1 and 10.")
+            return
+        if messageID:
+            await ctx.send("Picking a message hasn't been implemented quite yet.")
+            return
+        else:
+            anchorMessage = ctx.message
         # Get the specified number of messages
-        messages = await ctx.history(before=ctx.message,
+        messages = await ctx.history(before=anchorMessage,
                                      limit=count,
                                      reverse=True).flatten()
         # Now get a list of authors
