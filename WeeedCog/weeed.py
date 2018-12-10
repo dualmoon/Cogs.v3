@@ -35,7 +35,7 @@ class Weeedbot(commands.Cog):
     @weeed.command()
     async def comic(self, ctx: commands.Context, count: int):
         if count > 10:
-            await ctx.send("Whoa, shitlord. You expect me to parse _All That Shit_ by _you_?")
+            await ctx.send("Please limit yourself to 10 or less messages. I can't do everything, you know.")
             return
         # Get the specified number of messages
         messages = await ctx.history(before=ctx.message,
@@ -46,7 +46,7 @@ class Weeedbot(commands.Cog):
         # Next up, get a specified number of characters
         chars = listdir(f"{self.datapath}/char")
         actors = choices(chars, k=len(authors))
-        # And then we create a dictioary of actors for authors
+        # And then we create a dictionary of actors for authors
         actorMap = dict(zip(authors, actors))
         # At this point we should have all the necessary data
         # From here on, we build the scene
@@ -156,4 +156,4 @@ class Weeedbot(commands.Cog):
             # Now we need to draw a line to separate panels
             draw.line([(0,bottomEdge-1),(panelWidth, bottomEdge-1)], width=4, fill="black")
         canvas.save(canvasBytes, format="PNG")
-        await ctx.send(file=discord.File(canvasBytes.getvalue(), filename="weeed.png"))
+        await ctx.send("A comic, starring... some weirdos.", file=discord.File(canvasBytes.getvalue(), filename="weeed.png"))
