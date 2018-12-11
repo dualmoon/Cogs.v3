@@ -44,8 +44,11 @@ class Weeedbot(commands.Cog):
             await ctx.send("What to heck are u doin??? The number needs to be between 1 and 10.")
             return
         if messageID:
-            await ctx.send("Picking a message hasn't been implemented quite yet.")
-            return
+            try:
+                anchorMessage = await ctx.get_message(messageID):
+            except:
+                await ctx.send("Unable to find a message with that ID...")
+                return
         else:
             anchorMessage = ctx.message
         # Get the specified number of messages
