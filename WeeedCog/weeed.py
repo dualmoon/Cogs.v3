@@ -35,7 +35,7 @@ class Weeedbot(commands.Cog):
     @weeed.command()
     async def comic(self, ctx: commands.Context, count: int, messageID: int=None):
         if count > 10:
-            await ctx.send("Whoa, shitlord. You expect me to parse _All That Shit_ by _you_?")
+            await ctx.send("Whoa there, shitlord! You expect me to parse _All That Shit_ by _you_?")
             return
         elif count < 1:
             await ctx.send("Nice try there ;-]")
