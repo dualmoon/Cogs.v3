@@ -49,12 +49,15 @@ class Weeedbot(commands.Cog):
             except:
                 await ctx.send("Unable to find a message with that ID...")
                 return
+            finally:
+                count = count-1
         else:
             anchorMessage = ctx.message
         # Get the specified number of messages
         messages = await ctx.history(before=anchorMessage,
                                      limit=count,
                                      reverse=True).flatten()
+        if messageID: messages.append(anchorMessage)
         # Now get a list of authors
         authors = list(set([m.author.id for m in messages]))
         # Next up, get a specified number of characters
