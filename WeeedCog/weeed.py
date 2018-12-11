@@ -45,7 +45,7 @@ class Weeedbot(commands.Cog):
             return
         if messageID:
             try:
-                anchorMessage = await ctx.get_message(messageID):
+                anchorMessage = await ctx.get_message(messageID)
             except:
                 await ctx.send("Unable to find a message with that ID...")
                 return
