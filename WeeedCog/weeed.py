@@ -4,7 +4,7 @@ from PIL import Image, ImageOps, ImageDraw, ImageFont
 from redbot.core.data_manager import bundled_data_path
 from redbot.core.bot import Red
 from io import BytesIO
-from random import choices, choice
+from random import sample, choice
 from os import listdir
 from .textwrapper import TextWrapper
 
@@ -33,20 +33,36 @@ class Weeedbot(commands.Cog):
             pass
 
     @weeed.command()
-    async def comic(self, ctx: commands.Context, count: int):
+    async def comic(self, ctx: commands.Context, count: int, messageID: int=None):
         if count > 10:
-            await ctx.send("Please limit yourself to 10 or less messages. I can't do everything, you know.")
             return
+        elif count < 1:
+            await ctx.send("Huh? That's not possible...")
+            return
+        elif count not in range(1,11):
+            await ctx.send("Huh? I'm not sure that's even possible.")
+            return
+        if messageID:
+            try:
+                anchorMessage = await ctx.get_message(messageID)
+            except:
+                await ctx.send("Unable to find a message with that ID...")
+                return
+            finally:
+                count = count-1
+        else:
+            anchorMessage = ctx.message
         # Get the specified number of messages
-        messages = await ctx.history(before=ctx.message,
+        messages = await ctx.history(before=anchorMessage,
                                      limit=count,
                                      reverse=True).flatten()
+        if messageID: messages.append(anchorMessage)
         # Now get a list of authors
         authors = list(set([m.author.id for m in messages]))
         # Next up, get a specified number of characters
         chars = listdir(f"{self.datapath}/char")
-        actors = choices(chars, k=len(authors))
-        # And then we create a dictionary of actors for authors
+        actors = sample(chars, k=len(authors))
+        # And then we create a dictioary of actors for authors
         actorMap = dict(zip(authors, actors))
         # At this point we should have all the necessary data
         # From here on, we build the scene
