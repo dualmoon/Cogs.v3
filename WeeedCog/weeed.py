@@ -64,9 +64,9 @@ class Weeedbot(commands.Cog):
     async def _set_config(self, configKey, configVal):
         pass
 
-    def _get_rendered_text(text, font, width):
+    async def _get_rendered_text(self, text, font, width):
         wrapper = TextWrapper(text, font, width)
-        return wrapper.wrapped_text
+        return wrapper.wrapped_text()
 
     # Defines our main 'comic' command
     # Takes one int for comic length and another optional int to let us pick
@@ -78,7 +78,11 @@ class Weeedbot(commands.Cog):
     @weeed.command()
     async def comic(self, ctx: commands.Context, count: int, messageID: int=None):
         serverConfig = self.config.guild(ctx.guild)
-        if count > serverConfig.maxMessages:
+        maxMessages = await serverConfig.maxMessages()
+        backgroundImage = await serverConfig.backgroundImage()
+        comicText = await serverConfig.comicText()
+
+        if count > maxMessages:
             await ctx.send("Whoa there, shitlord! You expect me to parse _All That Shit_ by _you_?")
             return
         # Yeah yeah ok so -1 is technically an integer... Let's handle that
@@ -86,7 +90,7 @@ class Weeedbot(commands.Cog):
             await ctx.send("Nice try there ;-]")
             return
         # Now let's just catch any other input that's invalid.
-        elif count not in range(1, serverConfig.maxMessages-1):
+        elif count not in range(1, maxMessages-1):
             await ctx.send("What to heck are u doin??? The number needs to be between 1 and 10.")
             return
         # TODO: also make the messages either configurable, i18n, or both
@@ -155,7 +159,7 @@ class Weeedbot(commands.Cog):
                 })
             else:
                 if len(panel) == 1:  # We're looking at the "right" side
-                    prevTextRendered = self._get_rendered_text(messages[index-1], self.comicSans, self.textWidth)
+                    prevTextRendered = await self._get_rendered_text(messages[index-1].content, self.comicSans, self.textWidth)
                     # Blank panel if last author and this one are the same
                     # Blank panel if last message height is over 3 lines tall
                     if action.author == messages[index-1].author or len(prevTextRendered.split('\n')) > 3:
@@ -216,7 +220,7 @@ class Weeedbot(commands.Cog):
         # background with the default being the standard one, and the other
         # option should be to pick a random background and use it for every
         # panel, and maybe even one last option of a random background per panel
-        background = Image.open(f"{self.datapath}/background/{serverConfig.backgroundImage}")
+        background = Image.open(f"{self.datapath}/background/{backgroundImage}")
         # Create our Draw object
         draw = ImageDraw.Draw(canvas)
         # This is the top and sides margin size for text and characters
@@ -308,4 +312,4 @@ class Weeedbot(commands.Cog):
         # TODO: make the filename a unique hash or something so that we can
         # also store comic data under the same name with a different extension
         # This would let us debug any weird stuff rendered into comics.
-        await ctx.send(content=serverConfig.comicText, file=discord.File(canvasBytes.getvalue(), filename="weeed.png"))
+        await ctx.send(content=comicText, file=discord.File(canvasBytes.getvalue(), filename="weeed.png"))
