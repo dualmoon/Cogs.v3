@@ -19,6 +19,12 @@ class Weeedbot(commands.Cog):
         configID = 901101100011101010110111001100001
         # Grab our config object
         self.config = Config.get_conf(self, identifier=configID)
+        defaultConfigGuild = {
+            "maxMessages": 10,
+            "backgroundImage": 'beach-paradise-beach-desktop.jpg',
+            "comicText": None
+        }
+        self.config.register_guild(**default_guild)
         # This is our font object that we'll end up using basically everywhere
         # TODO: make this configurable - both the typeface and the size
         self.comicSans = ImageFont.truetype(f"{self.datapath}/font/ComicBD.ttf", size=15)
@@ -55,9 +61,10 @@ class Weeedbot(commands.Cog):
     # any message and the one prior
     @weeed.command()
     async def comic(self, ctx: commands.Context, count: int, messageID: int=None):
+        serverConfig = self.config.guild(ctx.guild)
         # Limit the comic to 10 for now as a sane default
         # TODO: make this configurable per-server using our config object
-        if count > 10:
+        if count > serverConfig.maxMessages:
             await ctx.send("Whoa there, shitlord! You expect me to parse _All That Shit_ by _you_?")
             return
         # Yeah yeah ok so -1 is technically an integer... Let's handle that
@@ -67,7 +74,7 @@ class Weeedbot(commands.Cog):
         # Now let's just catch any other input that's invalid.
         # TODO: expand this to take into account server-specific maximums
         # once implemented.
-        elif count not in range(1,11):
+    elif count not in range(1, (serverConfig.maxMessages)):
             await ctx.send("What to heck are u doin??? The number needs to be between 1 and 10.")
             return
         # TODO: also make the messages either configurable, i18n, or both
@@ -202,7 +209,7 @@ class Weeedbot(commands.Cog):
         # background with the default being the standard one, and the other
         # option should be to pick a random background and use it for every
         # panel, and maybe even one last option of a random background per panel
-        background = Image.open(f"{self.datapath}/background/beach-paradise-beach-desktop.jpg")
+        background = Image.open(f"{self.datapath}/background/{serverConfig.backgroundImage}")
         # Create our Draw object
         draw = ImageDraw.Draw(canvas)
         # This is the top and sides margin size for text and characters
@@ -292,4 +299,4 @@ class Weeedbot(commands.Cog):
         # TODO: make the filename a unique hash or something so that we can
         # also store comic data under the same name with a different extension
         # This would let us debug any weird stuff rendered into comics.
-        await ctx.send(file=discord.File(canvasBytes.getvalue(), filename="weeed.png"))
+        await ctx.send(content=serverConfig.comicText, file=discord.File(canvasBytes.getvalue(), filename="weeed.png"))
