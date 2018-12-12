@@ -83,9 +83,9 @@ class Weeedbot(commands.Cog):
             await ctx.send(f"maxMessages is currently {currentMax} for this guild.")
         elif max < 1:
             await ctx.send("That number is too small.")
-        elif max > 1000:
+        elif max > 80:
             await ctx.send("I wouldn't set it that high tbh....")
-        elif max not in range(1, 1001):
+        elif max not in range(1, 81):
             await ctx.send("Invalid value for maxMessages")
         else:
             await self.config.guild(ctx.guild).maxMessages.set(max)
