@@ -19,12 +19,12 @@ class Weeedbot(commands.Cog):
         configID = 901101100011101010110111001100001
         # Grab our config object
         self.config = Config.get_conf(self, identifier=configID)
-        defaultConfigGuild = {
+        self.defaultConfigGuild = {
             "maxMessages": 10,
             "backgroundImage": 'beach-paradise-beach-desktop.jpg',
-            "comicText": None
+            "comicText": None,
         }
-        self.config.register_guild(**defaultConfigGuild)
+        self.config.register_guild(**self.defaultConfigGuild)
         # Panels are 450px wide, so we make the text 300 wide to keep the
         # noticable offset of the left and right text blocks
         # This is our global text block width
@@ -50,19 +50,45 @@ class Weeedbot(commands.Cog):
     # worrying about command name collisions
     @commands.group()
     async def weeed(self, ctx: commands.Context):
-        # I believe this is superfluous, but it's here anyway?
-        # Basically, if we don't call a subcommand we do nothing.
-        # Might be worth making this spit out help later
-        if ctx.invoked_subcommand is None:
-            pass
+        pass
 
-    @weeed.group()
+    @weeed.group(name='set', autohelp=False)
     @checks.mod()
-    async def set(self, ctx: commands.Context):
+    async def wset(self, ctx: commands.Context):
         pass
 
-    async def _set_config(self, configKey, configVal):
-        pass
+    @wset.group(name='set')
+    @checks.mod()
+    async def maxMessages(self, ctx: commands.Context, max: int = None):
+        """ The max number of messages you can put in a comic """
+        if not max:
+            currentMax = await self.config.guild(ctx.guild).maxMessages()
+            await ctx.send(f"maxMessages is currently {currentMax} for this guild.")
+        elif max < 1:
+            await ctx.send("That number is too small.")
+        elif max > 1000:
+            await ctx.send("I wouldn't set it that high tbh....")
+        elif max not in range(1, 1001):
+            await ctx.send("Invalid value for maxMessages")
+        else:
+            await self.config.guild(ctx.guild).maxMessages.set(max)
+            newMax = await self.config.guild(ctx.guild).maxMessages()
+            await ctx.send(f"maxMessages for this guild is now set to {newMax}")
+
+    @wset.group()
+    @checks.mod()
+    async def comicText(self, ctx: commands.Context, *, text: str = None):
+        """ Text to accompany the comic when posted, or 'none' """
+        if not text:
+            currentText = await self.config.guild(ctx.guild).comicText()
+            await ctx.send(f"comicText is currently {currentText} for this guild.")
+        elif text.lower() == "none":
+            await self.config.guild(ctx.guild).comicText.set(None)
+            await ctx.send("comicText has been removed for this guild.")
+        else:
+            await self.config.guild(ctx.guild).comicText.set(text)
+            newText = await self.config.guild(ctx.guild).comicText()
+            await ctx.send(f"comicText is now set to {newText}")
 
     async def _get_rendered_text(self, text, font, width):
         wrapper = TextWrapper(text, font, width)
@@ -76,7 +102,7 @@ class Weeedbot(commands.Cog):
     # past 120 seconds or until there's a gap greater than 20 seconds between
     # any message and the one prior
     @weeed.command()
-    async def comic(self, ctx: commands.Context, count: int, messageID: int=None):
+    async def comic(self, ctx: commands.Context, count: int, messageID: int = None):
         serverConfig = self.config.guild(ctx.guild)
         maxMessages = await serverConfig.maxMessages()
         backgroundImage = await serverConfig.backgroundImage()
