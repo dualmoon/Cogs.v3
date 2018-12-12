@@ -132,7 +132,7 @@ class Weeedbot(commands.Cog):
             await ctx.send("Nice try there ;-]")
             return
         # Now let's just catch any other input that's invalid.
-        elif count not in range(1, maxMessages-1):
+        elif count not in range(1, maxMessages+1):
             await ctx.send("What to heck are u doin??? The number needs to be between 1 and 10.")
             return
         # TODO: also make the messages either configurable, i18n, or both
