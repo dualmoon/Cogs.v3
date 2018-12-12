@@ -52,13 +52,22 @@ class Weeedbot(commands.Cog):
     async def weeed(self, ctx: commands.Context):
         pass
 
-    @weeed.group(name='set', autohelp=False)
+    @weeed.group(name='set')
     @checks.mod()
     async def wset(self, ctx: commands.Context):
         pass
 
-    @wset.group(name='set')
-    @checks.mod()
+    @wset.command()
+    async def backgroundImage(self, ctx, filename: str = None):
+        """ The background to use for the comics, or "list" """
+        if not filename:
+            currentBg = await self.config.guild(ctx.guild).backgroundImage()
+            await ctx.send(f"backgroundImage is currently `{currentBg}` for this guild.")
+        elif filename == "list":
+            files = listdir(f"{self.datapath}/background")
+            await ctx.send(f"backgrounds: {files}")
+
+    @wset.command()
     async def maxMessages(self, ctx: commands.Context, max: int = None):
         """ The max number of messages you can put in a comic """
         if not max:
@@ -75,8 +84,7 @@ class Weeedbot(commands.Cog):
             newMax = await self.config.guild(ctx.guild).maxMessages()
             await ctx.send(f"maxMessages for this guild is now set to {newMax}")
 
-    @wset.group()
-    @checks.mod()
+    @wset.command()
     async def comicText(self, ctx: commands.Context, *, text: str = None):
         """ Text to accompany the comic when posted, or 'none' """
         if not text:
