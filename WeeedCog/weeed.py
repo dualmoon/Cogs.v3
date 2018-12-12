@@ -269,9 +269,9 @@ class Weeedbot(commands.Cog):
         # TODO: make this configurable per-server and take into account how
         # changing this changes text and char rendering
         textBuffer = 10
-        # Here's where we load our characters. The stuff way above where we pick
-        # a bunch of chars for each unique author should probably just be a
-        # simple list of unique IDs and we'll do the rest here instead.
+        # Here's where we load our characters. The stuff way above where we
+        # pick a bunch of chars for each unique author should probably just be
+        # a simple list of unique IDs and we'll do the rest here instead.
         # TODO: refactor per previous comment
         charImageMap = {}
         for id in authors:
@@ -334,7 +334,8 @@ class Weeedbot(commands.Cog):
             if len(comic[panelCount]) == 1 or not comic[panelCount][1]['text']:
                 continue
 
-            # And then we need to draw the right size text, giving it a top buffer equal to the height of the left text + 10 + textBuffer
+            # And then we need to draw the right size text, giving it a top
+            # buffer equal to the height of the left text + 10 + textBuffer
             leftBuffer = panelWidth - (rightTextWidth+textBuffer)
             # top side buffer should be the same, but add previous text height and textBuffer and an extra 20
             topBuffer = topBuffer+leftTextHeight+textBuffer
