@@ -4,7 +4,7 @@ from PIL import Image, ImageOps, ImageDraw, ImageFont
 from redbot.core.data_manager import bundled_data_path
 from redbot.core.bot import Red
 from io import BytesIO
-from random import sample, choice
+from random import sample
 from os import listdir
 from .textwrapper import TextWrapper
 
@@ -24,10 +24,11 @@ class Weeedbot(commands.Cog):
             "backgroundImage": 'beach-paradise-beach-desktop.jpg',
             "comicText": None
         }
-        self.config.register_guild(**default_guild)
+        self.config.register_guild(**defaultConfigGuild)
         # This is our font object that we'll end up using basically everywhere
         # TODO: make this configurable - both the typeface and the size
-        self.comicSans = ImageFont.truetype(f"{self.datapath}/font/ComicBD.ttf", size=15)
+        fontPath = f"{self.datapath}/font/ComicBD.ttf"
+        self.comicSans = ImageFont.truetype(fontPath, size=15)
         # This is our global text block width
         # Panels are 450px wide, so we make the text 300 wide to keep the
         # noticable offset of the left and right text blocks
@@ -52,6 +53,18 @@ class Weeedbot(commands.Cog):
         if ctx.invoked_subcommand is None:
             pass
 
+    @weeed.group()
+    @checks.mod()
+    async def set(self, ctx: commands.Context):
+        pass
+
+    async def _set_config(self, configKey, configVal):
+        pass
+
+    def _get_rendered_text(text, font, width):
+        wrapper = TextWrapper(text, font, width)
+        return wrapper.wrapped_text
+
     # Defines our main 'comic' command
     # Takes one int for comic length and another optional int to let us pick
     # what message should be the last
@@ -62,8 +75,6 @@ class Weeedbot(commands.Cog):
     @weeed.command()
     async def comic(self, ctx: commands.Context, count: int, messageID: int=None):
         serverConfig = self.config.guild(ctx.guild)
-        # Limit the comic to 10 for now as a sane default
-        # TODO: make this configurable per-server using our config object
         if count > serverConfig.maxMessages:
             await ctx.send("Whoa there, shitlord! You expect me to parse _All That Shit_ by _you_?")
             return
@@ -72,9 +83,7 @@ class Weeedbot(commands.Cog):
             await ctx.send("Nice try there ;-]")
             return
         # Now let's just catch any other input that's invalid.
-        # TODO: expand this to take into account server-specific maximums
-        # once implemented.
-    elif count not in range(1, (serverConfig.maxMessages)):
+        elif count not in range(1, serverConfig.maxMessages-1):
             await ctx.send("What to heck are u doin??? The number needs to be between 1 and 10.")
             return
         # TODO: also make the messages either configurable, i18n, or both
@@ -85,8 +94,8 @@ class Weeedbot(commands.Cog):
                 anchorMessage = await ctx.get_message(messageID)
             # ...and if we can't, throw an error
             # TODO: expand this to actually catch the exceptions this can throw
-            except:
-                await ctx.send("Unable to find a message with that ID...")
+            except (discord.NotFound, discord.Forbidden, discord.HTTPException) as error:
+                await ctx.send(f"Unable to find a message with that ID...{error}")
                 return
             # So the except returns, which means this happens only if we
             # were successful. We subtract 1 from the count so that we can
@@ -104,7 +113,8 @@ class Weeedbot(commands.Cog):
         # Again, if given a message ID, we need to get the history but also
         # add the message with the ID that was passed and, since we're using
         # reverse=True we append (otherwise we'd prepend)
-        if messageID: messages.append(anchorMessage)
+        if messageID:
+            messages.append(anchorMessage)
         # Now get a list of authors of messages that will be in the comic
         # Specifically we are getting _unique_ authors, thus the list(set())
         authors = list(set([m.author.id for m in messages]))
@@ -142,13 +152,7 @@ class Weeedbot(commands.Cog):
                 })
             else:
                 if len(panel) == 1:  # We're looking at the "right" side
-                    # Might be worth abstracting TextWrapper since it will
-                    # always take self.comicSans (or later, self.font) as well
-                    # as self.textWidth
-                    prevTextRenderedWrapper = TextWrapper(messages[index-1].content, self.comicSans, self.textWidth)
-                    # Would also be nice to have that abstraction do this part
-                    # too, since you can't inline the wrapped_text() func
-                    prevTextRendered = prevTextRenderedWrapper.wrapped_text()
+                    prevTextRendered = self._get_rendered_text(messages[index-1], self.comicSans, self.textWidth)
                     # Blank panel if last author and this one are the same
                     # Blank panel if last message height is over 3 lines tall
                     if action.author == messages[index-1].author or len(prevTextRendered.split('\n')) > 3:
@@ -294,8 +298,6 @@ class Weeedbot(commands.Cog):
         # Write the Image object to our BytesIO file-in-memory object
         canvas.save(canvasBytes, format="PNG")
         # Send the file away~~
-        # TODO: per-server configuration for text to send along with this
-        # default to none, let the server admin pick their string
         # TODO: make the filename a unique hash or something so that we can
         # also store comic data under the same name with a different extension
         # This would let us debug any weird stuff rendered into comics.
