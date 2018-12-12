@@ -66,6 +66,14 @@ class Weeedbot(commands.Cog):
         elif filename == "list":
             files = listdir(f"{self.datapath}/background")
             await ctx.send(f"backgrounds: {files}")
+        else:
+            files = listdir(f"{self.datapath}/background")
+            if filename in files:
+                await self.config.guild(ctx.guild).backgroundImage.set(filename)
+                newBg = await self.config.guild(ctx.guild).backgroundImage()
+                await ctx.send(f"New backgroundImage for this guild is {newBg}")
+            else:
+                await ctx.send(f"Couldn't find a background file called '{filename}'")
 
     @wset.command()
     async def maxMessages(self, ctx: commands.Context, max: int = None):
