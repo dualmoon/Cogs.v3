@@ -25,13 +25,9 @@ class Weeedbot(commands.Cog):
             "comicText": None
         }
         self.config.register_guild(**defaultConfigGuild)
-        # This is our font object that we'll end up using basically everywhere
-        # TODO: make this configurable - both the typeface and the size
-        fontPath = f"{self.datapath}/font/ComicBD.ttf"
-        self.comicSans = ImageFont.truetype(fontPath, size=15)
-        # This is our global text block width
         # Panels are 450px wide, so we make the text 300 wide to keep the
         # noticable offset of the left and right text blocks
+        # This is our global text block width
         self.textWidth = 300
 
     # self.datapath is a property here since the data path doesn't exist
@@ -41,6 +37,13 @@ class Weeedbot(commands.Cog):
     @property
     def datapath(self):
         return str(bundled_data_path(self))
+
+    @property
+    def comicSans(self):
+        # This is our font object that we'll end up using basically everywhere
+        # TODO: make this configurable - both the typeface and the size
+        fontPath = f"{self.datapath}/font/ComicBD.ttf"
+        return ImageFont.truetype(fontPath, size=15)
 
     # This decorator defines the cog's command group, basically our own
     # namespace where we can make all our commands common words without
@@ -204,8 +207,8 @@ class Weeedbot(commands.Cog):
         # No issue filed for the above todo yet
         canvasHeight = panelHeight*len(comic)
         canvas = Image.new("RGBA", (panelWidth, canvasHeight))
-        # canvasBytes is the in-memory image since we can't use the Image object
-        # directly as our attached file.
+        # canvasBytes is the in-memory image since we can't use the Image
+        # object directly as our attached file.
         canvasBytes = BytesIO()
         # Again, since the dawn of time this is the only background the comic
         # has ever used, but prescriptivism is shit so...
@@ -237,7 +240,7 @@ class Weeedbot(commands.Cog):
             # Calculate the bottom edge for various reasons
             bottomEdge = panelHeight*(panelCount+1)
             # Next we need to draw text...
-            ## We start by wrapping the text using our helper class
+            # We start by wrapping the text using our helper class
             # TextWrapper, just to be clear, calculates the length of rendered
             # text and wraps any words that would be wider than a given width
             leftTextWrapper = TextWrapper(comic[panelCount][0]['text'], self.comicSans, self.textWidth)
@@ -249,52 +252,56 @@ class Weeedbot(commands.Cog):
             # have the two chars scaled to be as tall as the space left beneath
             # both of the rendered text blocks
             # Here we check if there's going to be right side text at all
-            if len(comic[panelCount])==1 or not comic[panelCount][1]['text']:
+            if len(comic[panelCount]) == 1 or not comic[panelCount][1]['text']:
                 rightTextHeight = 0
             else:
                 rightTextWrapper = TextWrapper(comic[panelCount][1]['text'], self.comicSans, self.textWidth)
                 rightText = rightTextWrapper.wrapped_text()
-                ### left side buffer is rendered text width + textBuffer and find the difference between that and panelWidth
+                # left side buffer is rendered text width + textBuffer and find
+                # the difference between that and panelWidth
                 (rightTextWidth, rightTextHeight) = draw.multiline_textsize(rightText, font=self.comicSans)
             # Left side character time
-            ## We want to thumbnail the character to fit between the bottom of
-            ## the left text and the bottom of the panel, taking into account
-            ## buffers at the top and bottom
+            # We want to thumbnail the character to fit between the bottom of
+            # the left text and the bottom of the panel, taking into account
+            # buffers at the top and bottom
             leftBottomEdge = leftTextHeight+(textBuffer*2)
             charHeight = panelHeight-leftBottomEdge-(textBuffer*2)-rightTextHeight
-            if charHeight < 150: charHeight = 150
+            if charHeight < 150:
+                charHeight = 150
             charWidth = 225-(textBuffer*2)
             # Here we make a copy of the image so we can scale per-panel
             # without worrying about destroying the char loaded into memory
             thumb = charImageMap[comic[panelCount][0]['id']].copy()
-            thumb.thumbnail((charWidth,charHeight))
-            canvas.paste(thumb, (textBuffer,(panelHeight*(panelCount+1))-thumb.height), mask=thumb)
-            ## Now we draw the left side text, easy
-            ### left side buffer
+            thumb.thumbnail((charWidth, charHeight))
+            canvas.paste(thumb, (textBuffer, (panelHeight*(panelCount+1))-thumb.height), mask=thumb)
+            # Now we draw the left side text, easy
+            # left side buffer
             leftBuffer = textBuffer
-            ### top side buffer based on which panel we're in
+            # top side buffer based on which panel we're in
             topBuffer = textBuffer+(panelHeight*panelCount)
             # TODO: make this font pull from config instead of defaulting to
             # our comicSans object. Maybe make the text color configurable too?
             draw.multiline_text((leftBuffer, topBuffer), leftText, font=self.comicSans, fill="white")
 
-            # Non-DRY code here, checking again if there's a right side of this panel
-            if len(comic[panelCount])==1 or not comic[panelCount][1]['text']: continue
+            # Non-DRY code here, checking again if there's a right side of
+            # this panel
+            if len(comic[panelCount]) == 1 or not comic[panelCount][1]['text']:
+                continue
 
-            ## And then we need to draw the right size text, giving it a top buffer equal to the height of the left text + 10 + textBuffer
+            # And then we need to draw the right size text, giving it a top buffer equal to the height of the left text + 10 + textBuffer
             leftBuffer = panelWidth - (rightTextWidth+textBuffer)
-            ### top side buffer should be the same, but add previous text height and textBuffer and an extra 20
+            # top side buffer should be the same, but add previous text height and textBuffer and an extra 20
             topBuffer = topBuffer+leftTextHeight+textBuffer
-            ## Time for right side char
+            # Time for right side char
             thumb = charImageMap[comic[panelCount][1]['id']].copy()
             thumb.thumbnail((charWidth, charHeight))
             thumb = ImageOps.mirror(thumb)
             leftCharBuffer = panelWidth-(textBuffer+thumb.width)
-            canvas.paste(thumb, (leftCharBuffer,(panelHeight*(panelCount+1))-thumb.height), mask=thumb)
+            canvas.paste(thumb, (leftCharBuffer, (panelHeight*(panelCount+1))-thumb.height), mask=thumb)
             draw.multiline_text((leftBuffer, topBuffer), rightText, font=self.comicSans, fill="white")
             # Now we need to draw a line to separate panels
             # TODO: don't draw this line on the last panel
-            draw.line([(0,bottomEdge-1),(panelWidth, bottomEdge-1)], width=4, fill="black")
+            draw.line([(0, bottomEdge-1), (panelWidth, bottomEdge-1)], width=4, fill="black")
         # Write the Image object to our BytesIO file-in-memory object
         canvas.save(canvasBytes, format="PNG")
         # Send the file away~~
