@@ -4,9 +4,10 @@ from PIL import Image, ImageOps, ImageDraw, ImageFont
 from redbot.core.data_manager import bundled_data_path
 from redbot.core.bot import Red
 from io import BytesIO
-from random import sample
 from os import listdir
 from .textwrapper import TextWrapper
+from typing import List
+from random import shuffle
 
 
 class Weeedbot(commands.Cog):
@@ -113,9 +114,6 @@ class Weeedbot(commands.Cog):
         return wrapper.wrapped_text()
 
     async def _messages_to_comicdata(self, messages: List[discord.Message]):
-        # Now get a list of authors of messages that will be in the comic
-        # Specifically we are getting _unique_ authors, thus the list(set())
-        authors = list(set([m.author.id for m in messages]))
         # At this point we should have all the necessary data
         # From here on, we build the scene
         # ----------------------------------------------------
@@ -159,8 +157,8 @@ class Weeedbot(commands.Cog):
         if len(panel) > 0:
             comic.append(panel)
         # Our data is now ready. Time to build an image!
+        print(f"[WEEEDCOG] Comic data generated! Data follows:\n{comic}")
         return comic
-
 
     # Defines our main 'comic' command
     # Takes one int for comic length and another optional int to let us pick
@@ -247,9 +245,15 @@ class Weeedbot(commands.Cog):
         # pick a bunch of chars for each unique author should probably just be
         # a simple list of unique IDs and we'll do the rest here instead.
         # TODO: refactor per previous comment
+        # Now get a list of authors of messages that will be in the comic
+        # Specifically we are getting _unique_ authors, thus the list(set())
+        authorIDs = list(set([m.author.id for m in messages]))
+        # FIXME: this is broken
         charImageMap = {}
-        for id in authors:
-            charImageMap[id] = Image.open(f"{self.datapath}/char/{actorMap[id]}")
+        allChars = listdir(f"{self.datapath}/char")
+        shuffle(allChars)
+        for inc, id in enumerate(authorIDs):
+            charImageMap[id] = Image.open(f"{self.datapath}/char/{allChars[inc]}")
         # I think instead of iterating against a range like this, we should
         # probably iterate against the comic object directly?
         # This is where things get messy tbh, lots of possible refactoring and
