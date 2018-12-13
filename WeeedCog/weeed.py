@@ -152,11 +152,11 @@ class Weeedbot(commands.Cog):
             # TODO: sanitize these messages as we go, replacing user snowflakes
             # with user names, emoji snowflakes with :emojiname:, etc. etc.
             prevText = self._sanitize_usernames(action.guild, messages[index-1].content)
-            prevText = self._sanitize_channelnames(action.guild, messages[index-1].content)
-            prevText = self._sanitize_emojinames(messages[index-1].content)
+            prevText = self._sanitize_channelnames(action.guild, prevText)
+            prevText = self._sanitize_emojinames(prevText)
             thisText = self._sanitize_usernames(action.guild, action.content)
-            thisText = self._sanitize_channelnames(action.guild, action.content)
-            thisText = self._sanitize_emojinames(action.content)
+            thisText = self._sanitize_channelnames(action.guild, thisText)
+            thisText = self._sanitize_emojinames(thisText)
             # TODO: build a frankenfont that has all codepoints that Comic Sans
             # doesn't cover replaced with Noto Emoji font glyphs for better
             # rendering of unicode emojis
