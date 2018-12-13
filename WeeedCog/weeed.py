@@ -131,6 +131,15 @@ class Weeedbot(commands.Cog):
         )
         return result
 
+    def _sanitize_emojinames(self, text):
+        regex = re.compile(r"(?:<a?)(\:[0-9a-zA-Z]+\:)(?:[0-9]+>)")
+        result = re.sub(
+                    regex,
+                    lambda m: m.group(1),
+                    text
+        )
+        return result
+
     # This takes a list of discord messages and converts them to a dict that we
     # can easily use to generate the comic.
     async def _messages_to_comicdata(self, messages: List[discord.Message]):
@@ -144,8 +153,10 @@ class Weeedbot(commands.Cog):
             # with user names, emoji snowflakes with :emojiname:, etc. etc.
             prevText = self._sanitize_usernames(action.guild, messages[index-1].content)
             prevText = self._sanitize_channelnames(action.guild, messages[index-1].content)
+            prevText = self._sanitize_emojinames(messages[index-1].content)
             thisText = self._sanitize_usernames(action.guild, action.content)
             thisText = self._sanitize_channelnames(action.guild, action.content)
+            thisText = self._sanitize_emojinames(action.content)
             # TODO: build a frankenfont that has all codepoints that Comic Sans
             # doesn't cover replaced with Noto Emoji font glyphs for better
             # rendering of unicode emojis
