@@ -1,5 +1,6 @@
 from redbot.core import commands, Config, checks
 import discord
+import re
 from PIL import Image, ImageOps, ImageDraw, ImageFont
 from redbot.core.data_manager import bundled_data_path
 from redbot.core.bot import Red
@@ -113,10 +114,18 @@ class Weeedbot(commands.Cog):
         wrapper = TextWrapper(text, font, width)
         return wrapper.wrapped_text()
 
+    def _sanitize_usernames(self, guild, text):
+        regex = re.compile(r"(?:<@!?)([0-9]+)(?:>)")
+        result = re.sub(
+                    regex,
+                    lambda m: guild.get_member(int(m.group(1))).display_name,
+                    text)
+        return result
+
+    # This takes a list of discord messages and converts them to a dict that we
+    # can easily use to generate the comic.
     async def _messages_to_comicdata(self, messages: List[discord.Message]):
-        # At this point we should have all the necessary data
-        # From here on, we build the scene
-        # ----------------------------------------------------
+        """ Convert list of discord messages to comic data """
         comic = []
         panel = []
         # Using enumerate so we can carry an index for lookahead, lookbehind
@@ -124,11 +133,13 @@ class Weeedbot(commands.Cog):
             # The very first message always goes in the same spot
             # TODO: sanitize these messages as we go, replacing user snowflakes
             # with user names, emoji snowflakes with :emojiname:, etc. etc.
+            prevText = self._sanitize_usernames(action.guild, messages[index-1].content)
+            thisText = self._sanitize_usernames(action.guild, action.content)
             # TODO: build a frankenfont that has all codepoints that Comic Sans
             # doesn't cover replaced with Noto Emoji font glyphs for better
             # rendering of unicode emojis
             if len(panel) == 1:  # We're looking at the "right" side
-                prevTextRendered = await self._get_rendered_text(messages[index-1].content, self.comicSans, self.textWidth)
+                prevTextRendered = await self._get_rendered_text(prevText, self.comicSans, self.textWidth)
                 # Blank panel if last author and this one are the same
                 # Blank panel if last message height is over 3 lines tall
                 # TODO:
@@ -142,12 +153,12 @@ class Weeedbot(commands.Cog):
                     comic.append(panel)
                     panel = []
                     panel.append({
-                        'text': action.content,
+                        'text': thisText,
                         'id': action.author.id
                     })
                     continue
             panel.append({
-                'text': action.content,
+                'text': thisText,
                 'id': action.author.id
             })
             if len(panel) == 2:
