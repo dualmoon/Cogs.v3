@@ -1,12 +1,14 @@
 from redbot.core import commands, Config, checks
 import discord
+import re
 from PIL import Image, ImageOps, ImageDraw, ImageFont
 from redbot.core.data_manager import bundled_data_path
 from redbot.core.bot import Red
 from io import BytesIO
-from random import sample
 from os import listdir
 from .textwrapper import TextWrapper
+from typing import List
+from random import shuffle
 
 
 class Weeedbot(commands.Cog):
@@ -38,6 +40,8 @@ class Weeedbot(commands.Cog):
     def datapath(self):
         return str(bundled_data_path(self))
 
+    # We're making this a property so that it doesn't try to call datapath
+    # before the data path exists
     @property
     def comicSans(self):
         # This is our font object that we'll end up using basically everywhere
@@ -84,7 +88,7 @@ class Weeedbot(commands.Cog):
         elif max < 1:
             await ctx.send("That number is too small.")
         elif max > 80:
-            await ctx.send("I wouldn't set it that high tbh....")
+            await ctx.send("Setting this higher than 80 will result in files too big to post.")
         elif max not in range(1, 81):
             await ctx.send("Invalid value for maxMessages")
         else:
@@ -109,6 +113,63 @@ class Weeedbot(commands.Cog):
     async def _get_rendered_text(self, text, font, width):
         wrapper = TextWrapper(text, font, width)
         return wrapper.wrapped_text()
+
+    def _sanitize_usernames(self, guild, text):
+        regex = re.compile(r"(?:<@!?)([0-9]+)(?:>)")
+        result = re.sub(
+                    regex,
+                    lambda m: guild.get_member(int(m.group(1))).display_name,
+                    text)
+        return result
+
+    # This takes a list of discord messages and converts them to a dict that we
+    # can easily use to generate the comic.
+    async def _messages_to_comicdata(self, messages: List[discord.Message]):
+        """ Convert list of discord messages to comic data """
+        comic = []
+        panel = []
+        # Using enumerate so we can carry an index for lookahead, lookbehind
+        for index, action in enumerate(messages):
+            # The very first message always goes in the same spot
+            # TODO: sanitize these messages as we go, replacing user snowflakes
+            # with user names, emoji snowflakes with :emojiname:, etc. etc.
+            prevText = self._sanitize_usernames(action.guild, messages[index-1].content)
+            thisText = self._sanitize_usernames(action.guild, action.content)
+            # TODO: build a frankenfont that has all codepoints that Comic Sans
+            # doesn't cover replaced with Noto Emoji font glyphs for better
+            # rendering of unicode emojis
+            if len(panel) == 1:  # We're looking at the "right" side
+                prevTextRendered = await self._get_rendered_text(prevText, self.comicSans, self.textWidth)
+                # Blank panel if last author and this one are the same
+                # Blank panel if last message height is over 3 lines tall
+                # TODO:
+                if action.author == messages[index-1].author or len(prevTextRendered.split('\n')) > 3:
+                    # So in this case we want to only have one action
+                    # in the panel instead of two because of either
+                    # a monologue or a big text block
+                    # We probably want to change 'char' to the user's ID
+                    # when we switch to not pulling char image names
+                    panel.append({'char': None, 'text': None})
+                    comic.append(panel)
+                    panel = []
+                    panel.append({
+                        'text': thisText,
+                        'id': action.author.id
+                    })
+                    continue
+            panel.append({
+                'text': thisText,
+                'id': action.author.id
+            })
+            if len(panel) == 2:
+                comic.append(panel)
+                panel = []
+        # Now we check for any stragglers and append them.
+        if len(panel) > 0:
+            comic.append(panel)
+        # Our data is now ready. Time to build an image!
+        print(f"[WEEEDCOG] Comic data generated! Data follows:\n{comic}")
+        return comic
 
     # Defines our main 'comic' command
     # Takes one int for comic length and another optional int to let us pick
@@ -164,86 +225,8 @@ class Weeedbot(commands.Cog):
         # reverse=True we append (otherwise we'd prepend)
         if messageID:
             messages.append(anchorMessage)
-        # Now get a list of authors of messages that will be in the comic
-        # Specifically we are getting _unique_ authors, thus the list(set())
-        authors = list(set([m.author.id for m in messages]))
-        # Now we'll grab every character filename so we can grab random ones
-        chars = listdir(f"{self.datapath}/char")
-        # We get one character per unique author. We use random.sample()
-        # because random.choices() doesn't pull unique values for some reason.
-        actors = sample(chars, k=len(authors))
-        # And then we create a dictioary of actors for authors. This probably
-        # should change since later we have to do another map of user IDs to
-        # PIL.Image objects. I don't think we want to load images in this
-        # section of code though, since we will break this out into its own
-        # function of essentially list of message -> comic object
-        # Probably we'll actually just have a list of IDs that we don't map
-        # to Images or char names or anything until the second function
-        actorMap = dict(zip(authors, actors))
-        # At this point we should have all the necessary data
-        # From here on, we build the scene
-        # ----------------------------------------------------
-        comic = []
-        panel = []
-        # Using enumerate so we can carry an index for lookahead, lookbehind
-        for index, action in enumerate(messages):
-            # The very first message always goes in the same spot
-            # TODO: sanitize these messages as we go, replacing user snowflakes
-            # with user names, emoji snowflakes with :emojiname:, etc. etc.
-            # TODO: build a frankenfont that has all codepoints that Comic Sans
-            # doesn't cover replaced with Noto Emoji font glyphs for better
-            # rendering of unicode emojis
-            if index == 0:
-                panel.append({
-                    'char': actorMap[action.author.id],
-                    'text': action.content,
-                    'id': action.author.id
-                })
-            else:
-                if len(panel) == 1:  # We're looking at the "right" side
-                    prevTextRendered = await self._get_rendered_text(messages[index-1].content, self.comicSans, self.textWidth)
-                    # Blank panel if last author and this one are the same
-                    # Blank panel if last message height is over 3 lines tall
-                    if action.author == messages[index-1].author or len(prevTextRendered.split('\n')) > 3:
-                        # So in this case we want to only have one action
-                        # in the panel instead of two because of either
-                        # a monologue or a big text block
-                        # We probably want to change 'char' to the user's ID
-                        # when we switch to not pulling char image names
-                        panel.append({'char': None, 'text': None})
-                        comic.append(panel)
-                        panel = []
-                        panel.append({
-                            'char': actorMap[action.author.id],
-                            'text': action.content,
-                            'id': action.author.id
-                        })
-                    else:
-                        # This isn't DRY.
-                        # TODO: move this append-check action to a helper func
-                        panel.append({
-                            'char': actorMap[action.author.id],
-                            'text': action.content,
-                            'id': action.author.id
-                        })
-                        if len(panel) == 2:
-                            comic.append(panel)
-                            panel = []
-                # I'm pretty sure we don't need two elses here? They do the
-                # same thing.
-                else:
-                    panel.append({
-                        'char': actorMap[action.author.id],
-                        'text': action.content,
-                        'id': action.author.id
-                    })
-                    if len(panel) == 2:
-                        comic.append(panel)
-                        panel = []
-        # Now we check for any stragglers and append them.
-        if len(panel) > 0:
-            comic.append(panel)
-        # Our data is now ready. Time to build an image!
+
+        comic = await self._messages_to_comicdata(messages)
         # These have been the defaults since the dawn of time. Do we ever want
         # to make them configurable? That would require some other changes too.
         panelWidth = 450
@@ -273,9 +256,15 @@ class Weeedbot(commands.Cog):
         # pick a bunch of chars for each unique author should probably just be
         # a simple list of unique IDs and we'll do the rest here instead.
         # TODO: refactor per previous comment
+        # Now get a list of authors of messages that will be in the comic
+        # Specifically we are getting _unique_ authors, thus the list(set())
+        authorIDs = list(set([m.author.id for m in messages]))
+        # FIXME: this is broken
         charImageMap = {}
-        for id in authors:
-            charImageMap[id] = Image.open(f"{self.datapath}/char/{actorMap[id]}")
+        allChars = listdir(f"{self.datapath}/char")
+        shuffle(allChars)
+        for inc, id in enumerate(authorIDs):
+            charImageMap[id] = Image.open(f"{self.datapath}/char/{allChars[inc]}")
         # I think instead of iterating against a range like this, we should
         # probably iterate against the comic object directly?
         # This is where things get messy tbh, lots of possible refactoring and
