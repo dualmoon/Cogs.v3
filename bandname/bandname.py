@@ -174,4 +174,4 @@ class BandName(commands.Cog):
                 else:
                     await ctx.send(f"{channel.name} was not found in the blacklist!")
             elif command == "list":
-                await ctx.send(f"Current blacklist for {ctx.guild.name}: {repr([x for x in ctx.guild.get_channel(channel_blacklist)])}")
+                await ctx.send(f"Current blacklist for {ctx.guild.name}: {repr([ctx.guild.get_channel(x) for x in channel_blacklist])}")
