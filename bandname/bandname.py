@@ -34,10 +34,8 @@ class BandName(commands.Cog):
 
     async def on_message(self, message):
         if message.author == self.bot.user:
-            print(f"ignoring my own messages")
             return
         if type(message.channel) != discord.TextChannel:
-            print(f"ignoring DM")
             return
         # TODO: reorder these so that the most common disqualifiers are checked first
         # check for channel or server blacklisted, etc
@@ -45,25 +43,20 @@ class BandName(commands.Cog):
         # check if the guild has this cog disabled completely
         guild_disabled = await guild_config.disabled()
         if guild_disabled:
-            print(f"disabled for {message.guild.name}, passing")
             return
         # check if the guild has the channel the message came from blacklisted
         channel_blacklist = await guild_config.channel_blacklist()
         if message.channel.id in channel_blacklist:
-            print(f"disabled for #{message.channel.name}, passing")
             return
         # roughshod list that should exclude urls, mentions, channels
         if any(x in self.blacklists for x in message.content) or self.blacklist_regex.match(message.content):
-            print(f"message content blacklisted. content: {message.content}")
             return
         # make sure the message is of the appropriate length
         if 1 < len(message.content.split()) < 5:
-            print(f"message '{message.content}' matched, rolling")
             # actually do the deal
             p_mod = await guild_config.p_mod()
             roll = random()*1000
             if roll+p_mod > 999:
-                print(f"roll hit.")
                 # pick a random genre
                 genres = await self.config.genres()
                 genre = choice(genres)
@@ -73,21 +66,23 @@ class BandName(commands.Cog):
                 await guild_config.p_mod.set(0)
             else:
                 p_scale = await guild_config.p_scale()
-                print(f"roll miss, incremeting pmod for {message.guild.name} by {p_scale}, new total will be {p_mod+p_scale}")
                 await guild_config.p_mod.set(p_mod+p_scale)
 
 
     @commands.group()
     async def bandname(self, ctx: Context):
+        """Fun cog that randomly turns user messages into band names."""
         pass
 
     @bandname.group(name='set')
     @checks.mod()
     async def bandname_set(self, ctx: Context):
+        """Changes settings for the bandname cog."""
         pass
 
     @bandname_set.command('pmod')
     async def bandname_set_pmod(self, ctx: Context, new_pmod: float = None):
+        """View and set your probability modifier."""
         pmod = await self.config.guild(ctx.guild).p_mod()
         if not new_pmod:
             await ctx.send(f"P_mod for {ctx.guild.name} is {pmod}")
@@ -101,6 +96,7 @@ class BandName(commands.Cog):
     
     @bandname_set.command('pscale')
     async def bandname_set_pscale(self, ctx: Context, new_pscale: float = None):
+        """View and set your probability scaling. Higher numbers mean more band names."""
         pscale = await self.config.guild(ctx.guild).p_scale()
         if not new_pscale:
             await ctx.send(f"P_scale for {ctx.guild.name} is {pscale}")
@@ -114,6 +110,7 @@ class BandName(commands.Cog):
 
     @bandname_set.command('toggle')
     async def bandname_set_toggle(self, ctx: Context):
+        """Toggles the bandname cog on/off for this guild"""
         disabled = await self.config.guild(ctx.guild).disabled()
         await self.config.guild(ctx.guild).disabled.set(not disabled)
         disabled = await self.config.guild(ctx.guild).disabled()
@@ -125,6 +122,7 @@ class BandName(commands.Cog):
 
     @bandname_set.command('genres')
     async def bandname_set_genres(self, ctx: Context, command: str=None, *, genre: str=None):
+        """Allows you to add, remove, and view band genres."""
         genres = await self.config.genres()
         if not command:
             # Help, basically
@@ -154,6 +152,7 @@ class BandName(commands.Cog):
 
     @bandname_set.command('blacklist')
     async def bandname_set_blacklist(self, ctx: Context, command: str=None, *, channel: discord.TextChannel=None):
+        """Allows you to blacklist channels for this cog."""
         channel_blacklist = await self.config.guild(ctx.guild).channel_blacklist()
         if not command:
             await ctx.send("Valid commands are 'add', 'del', and 'list'")
@@ -175,4 +174,4 @@ class BandName(commands.Cog):
                 else:
                     await ctx.send(f"{channel.name} was not found in the blacklist!")
             elif command == "list":
-                await ctx.send(f"Current blacklist for {ctx.guild.name}: {repr(channel_blacklist)}")
+                await ctx.send(f"Current blacklist for {ctx.guild.name}: {repr([x for x in ctx.guild.get_channel(channel_blacklist)])}")
