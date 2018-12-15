@@ -87,7 +87,7 @@ class BandName(commands.Cog):
         pass
 
     @bandname_set.command('pmod')
-    async def bandname_set_pmod(self, ctx: Context, new_pmod: int = None):
+    async def bandname_set_pmod(self, ctx: Context, new_pmod: float = None):
         pmod = await self.config.guild(ctx.guild).p_mod()
         if not new_pmod:
             await ctx.send(f"P_mod for {ctx.guild.name} is {pmod}")
@@ -100,7 +100,7 @@ class BandName(commands.Cog):
                 await ctx.send(f"P_mod for {ctx.guild.name} is now {pmod}")
     
     @bandname_set.command('pscale')
-    async def bandname_set_pscale(self, ctx: Context, new_pscale: int = None):
+    async def bandname_set_pscale(self, ctx: Context, new_pscale: float = None):
         pscale = await self.config.guild(ctx.guild).p_scale()
         if not new_pscale:
             await ctx.send(f"P_scale for {ctx.guild.name} is {pscale}")
