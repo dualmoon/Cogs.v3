@@ -62,7 +62,7 @@ class BandName(commands.Cog):
                 genre = choice(genres)
                 # send the message
                 band = message.content.strip()
-                await message.channel.send(f"{band} is the name of my new {genre} band")
+                await message.channel.send(f"\"{band}\" is the name of my new {genre} band")
                 await guild_config.p_mod.set(0)
             else:
                 p_scale = await guild_config.p_scale()
