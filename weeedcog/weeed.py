@@ -119,7 +119,8 @@ class Weeedbot(commands.Cog):
         wrapper = TextWrapper(text, font, width)
         return wrapper.wrapped_text()
 
-    def _sanitize_usernames(self, guild, text):
+    @staticmethod
+    def _sanitize_usernames(guild, text):
         regex = re.compile(r"(?:<@!?)([0-9]+)(?:>)")
         result = re.sub(
                     regex,
@@ -128,7 +129,7 @@ class Weeedbot(commands.Cog):
         return result
 
     @staticmethod
-    def _sanitize_channelnames(self, guild, text):
+    def _sanitize_channelnames(guild, text):
         regex = re.compile(r"(?:<#)([0-9]+)(?:>)")
         result = re.sub(
                     regex,
@@ -138,7 +139,7 @@ class Weeedbot(commands.Cog):
         return result
 
     @staticmethod
-    def _sanitize_emojinames(self, text):
+    def _sanitize_emojinames(text):
         regex = re.compile(r"(?:<a?)(\:[0-9a-zA-Z]+\:)(?:[0-9]+>)")
         result = re.sub(
                     regex,
