@@ -323,7 +323,7 @@ class Weeedbot(commands.Cog):
             if len(comic[panel_count]) == 1 or not comic[panel_count][1]['text']:
                 right_text_height = 0
             else:
-                right_text = self._get_rendered_text(
+                right_text = await self._get_rendered_text(
                     comic[panel_count][1]['text'],
                     self.comic_sans,
                     self.text_width
