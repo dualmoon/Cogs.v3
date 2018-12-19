@@ -188,11 +188,10 @@ class Weeedbot(commands.Cog):
             # doesn't cover replaced with Noto Emoji font glyphs for better
             # rendering of unicode emojis
             if len(panel) == 1:  # We're looking at the "right" side
-                font = await self.config.guild(ctx.guild).font()
+                font = await self.config.guild(action.guild).font()
                 prev_text_rendered = await self._get_rendered_text(prev_text, self.font(font), self.text_width)
                 # Blank panel if last author and this one are the same
                 # Blank panel if last message height is over 3 lines tall
-                # TODO:
                 if action.author == messages[index-1].author or len(prev_text_rendered.split('\n')) > 3:
                     # So in this case we want to only have one action
                     # in the panel instead of two because of either
