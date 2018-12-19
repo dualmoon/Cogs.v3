@@ -44,12 +44,7 @@ class Weeedbot(commands.Cog):
         """Returns the path to the bundled data folder."""
         return str(bundled_data_path(self))
 
-    # We're making this a property so that it doesn't try to call datapath
-    # before the data path exists
-    @property
-    def font(self, font):
-        # This is our font object that we'll end up using basically everywhere
-        # TODO: make this configurable - both the typeface and the size
+    def _get_font(self, font):
         font_path = f"{self.datapath}/font/{font}"
         return ImageFont.truetype(font_path, size=15)
 
@@ -188,8 +183,9 @@ class Weeedbot(commands.Cog):
             # doesn't cover replaced with Noto Emoji font glyphs for better
             # rendering of unicode emojis
             if len(panel) == 1:  # We're looking at the "right" side
-                font = await self.config.guild(action.guild).font()
-                prev_text_rendered = await self._get_rendered_text(prev_text, self.font(font), self.text_width)
+                guild_font = await self.config.guild(action.guild).font()
+                font = self._get_font(guild_font)
+                prev_text_rendered = await self._get_rendered_text(prev_text, font, self.text_width)
                 # Blank panel if last author and this one are the same
                 # Blank panel if last message height is over 3 lines tall
                 if action.author == messages[index-1].author or len(prev_text_rendered.split('\n')) > 3:
@@ -326,15 +322,16 @@ class Weeedbot(commands.Cog):
             # We start by wrapping the text using our helper class
             # TextWrapper, just to be clear, calculates the length of rendered
             # text and wraps any words that would be wider than a given width
-            font = await self.config.guild(ctx.guild).font()
+            guild_font = await self.config.guild(ctx.guild).font()
+            font = self._get_font(guild_font)
             left_text = await self._get_rendered_text(
                                     comic[panel_count][0]['text'],
-                                    self.font(font),
+                                    font,
                                     self.text_width
                                     )
             # Now we find out how tall the left side text is so we can scale
             # the chars properly beneath it.
-            (_, left_text_height) = draw.multiline_textsize(left_text, font=self.font(font))
+            (_, left_text_height) = draw.multiline_textsize(left_text, font=font)
             # We also need to calculate the right side text height because we
             # have the two chars scaled to be as tall as the space left beneath
             # both of the rendered text blocks
@@ -344,12 +341,12 @@ class Weeedbot(commands.Cog):
             else:
                 right_text = await self._get_rendered_text(
                     comic[panel_count][1]['text'],
-                    self.font(font),
+                    font,
                     self.text_width
                     )
                 # left side buffer is rendered text width + text_buffer and find
                 # the difference between that and panel_width
-                (right_text_width, right_text_height) = draw.multiline_textsize(right_text, font=self.font(font))
+                (right_text_width, right_text_height) = draw.multiline_textsize(right_text, font=font)
             # Left side character time
             # We want to thumbnail the character to fit between the bottom of
             # the left text and the bottom of the panel, taking into account
@@ -371,7 +368,7 @@ class Weeedbot(commands.Cog):
             top_buffer = text_buffer+(panel_height*panel_count)
             # TODO: make this font pull from config instead of defaulting to
             # our font object. Maybe make the text color configurable too?
-            draw.multiline_text((left_buffer, top_buffer), left_text, font=self.font(font), fill="white")
+            draw.multiline_text((left_buffer, top_buffer), left_text, font=font, fill="white")
 
             # Non-DRY code here, checking again if there's a right side of
             # this panel
@@ -389,7 +386,7 @@ class Weeedbot(commands.Cog):
             thumb = ImageOps.mirror(thumb)
             left_char_buffer = panel_width-(text_buffer+thumb.width)
             canvas.paste(thumb, (left_char_buffer, (panel_height*(panel_count+1))-thumb.height), mask=thumb)
-            draw.multiline_text((left_buffer, top_buffer), right_text, font=self.font(font), fill="white")
+            draw.multiline_text((left_buffer, top_buffer), right_text, font=font, fill="white")
             # Now we need to draw a line to separate panels
             # TODO: don't draw this line on the last panel
             draw.line([(0, bottom_edge-1), (panel_width, bottom_edge-1)], width=4, fill="black")
