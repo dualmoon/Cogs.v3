@@ -33,9 +33,9 @@ class WebServer:
 
         # configure handler
         self.handler = self.app.make_handler(debug=True)
-        self.handler = web.TCPSite(self.runner, 'localhost', self.port)
+        self.handler = web.TCPSite(self.runner, '0.0.0.0', self.port)
         await self.handler.start()
-        print('WebTest started ...')
+        print('WebTest started...')
 
     async def get_message(self, message):
         pass
