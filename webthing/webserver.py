@@ -2,11 +2,10 @@ from aiohttp import web
 import asyncio
 
 
-class WebTest:
+class WebServer:
 
-    def __init__(self, bot):
+    def __init__(self):
         self.app = web.Application()
-        self.bot = bot
         self.port = 8088
         self.handler = None
         self.runner = None
