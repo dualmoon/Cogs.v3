@@ -7,3 +7,7 @@ class WebThing(commands.Cog):
         self.bot = bot
         self.web = WebServer()
         self.bot.loop.create_task(self.web.make_webserver())
+
+    def __unload(self):
+        self.web.shutdown(self.bot.loop)
+        print("In Cog unload...")

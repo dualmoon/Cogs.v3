@@ -11,8 +11,8 @@ class WebServer:
         self.runner = None
         self.div = ""
 
-    def __unload(self):
-        self.bot.loop.create_task(self.runner.cleanup())
+    def shutdown(self, loop):
+        loop.create_task(self.runner.cleanup())
 
     async def make_webserver(self):
         async def root_get(request):
