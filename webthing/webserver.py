@@ -32,7 +32,6 @@ class WebServer:
         await self.runner.setup()
 
         # configure handler
-        self.handler = self.app.make_handler(debug=True)
         self.handler = web.TCPSite(self.runner, '0.0.0.0', self.port)
         await self.handler.start()
         print('WebTest started...')
