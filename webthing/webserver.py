@@ -1,15 +1,14 @@
 from aiohttp import web
-import asyncio
 
 
 class WebServer:
 
-    def __init__(self):
+    def __init__(self, port: int = 8088, host: str = '0.0.0.0'):
         self.app = web.Application()
-        self.port = 8088
+        self.port = port
+        self.host = host
         self.handler = None
         self.runner = None
-        self.div = ""
 
     def shutdown(self, loop):
         loop.create_task(self.runner.cleanup())
@@ -19,25 +18,14 @@ class WebServer:
             # response logic goes here.
             return web.Response(text="<h1>this is a test</h1>", content_type='text/html')
 
-        async def root_post(request):
-            pass
-
-        await asyncio.sleep(10)
         # router work goes here -- define pages
         self.app.router.add_get('/', root_get)
-        self.app.router.add_post('/', root_post)
 
         # create our async runner
         self.runner = web.AppRunner(self.app)
         await self.runner.setup()
 
         # configure handler
-        self.handler = web.TCPSite(self.runner, '0.0.0.0', self.port)
+        self.handler = web.TCPSite(self.runner, self.host, self.port)
         await self.handler.start()
-        print('WebTest started...')
-
-    async def get_message(self, message):
-        pass
-
-    async def reloadhtml(self):
-        pass
+        print(f"Web server started at {self.host}:{self.port}...")

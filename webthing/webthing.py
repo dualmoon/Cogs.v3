@@ -10,4 +10,3 @@ class WebThing(commands.Cog):
 
     def __unload(self):
         self.web.shutdown(self.bot.loop)
-        print("In Cog unload...")
