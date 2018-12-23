@@ -1,7 +1,5 @@
 from aiohttp import web
 import asyncio
-import os
-from shutil import copyfile
 
 
 class WebTest:
@@ -21,7 +19,7 @@ class WebTest:
         async def root_get(request):
             # response logic goes here.
             return web.Response(text="<h1>this is a test</h1>", content_type='text/html')
-        
+
         async def root_post(request):
             pass
 
