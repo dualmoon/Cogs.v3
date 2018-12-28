@@ -10,3 +10,5 @@ bandname -- randomly chosen bands, including genre!
 selfassign -- lets users self-assign specificed roles without moderator action
 
 feedback -- allows users to submit anonymous feedback to any server that the user and the bot share
+
+webthing -- test cog that implements a working webserver loop
