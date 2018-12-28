@@ -8,3 +8,5 @@ weeedcog -- a brand new attempt at the one and only weedbot, now for discord
 bandname -- randomly chosen bands, including genre!
 
 selfassign -- lets users self-assign specificed roles without moderator action
+
+feedback -- allows users to submit anonymous feedback to any server that the user and the bot share
