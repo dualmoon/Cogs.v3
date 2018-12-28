@@ -2,7 +2,6 @@ from aiohttp import web
 
 
 class WebServer:
-
     def __init__(self, port: int = 8088, host: str = '0.0.0.0'):
         self.app = web.Application()
         self.port = port
