@@ -2,7 +2,7 @@
     "author": [
         "luna"
     ],
-    "description": "Allows users to self-assign chosen roles without the help of a moderator",
+    "description": "Randomly creates names for made up bands by scanning messages 2-5 words in length and applying them to bands of a randomly chosen genre.",
     "disabled": false,
     "hidden": false,
     "install_msg": "Thanks for installing this cog! Please report any issues here: https://github.com/dualmoon/Cogs.v3/issues",
@@ -11,8 +11,8 @@
         7,
         0
     ],
-    "name": "selfassign",
+    "name": "bandname",
     "requirements": [],
-    "short": "Allows users to self-assign roles",
+    "short": "Randomly creates names for made up bands.",
     "tags": []
 }

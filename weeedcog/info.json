@@ -1,0 +1,18 @@
+{
+    "author": [
+        "luna"
+    ],
+    "description": "Creates comics with random characters using a string of messages from a channel.",
+    "disabled": false,
+    "hidden": false,
+    "install_msg": "Thanks for installing this cog! Please report any issues here: https://github.com/dualmoon/Cogs.v3/issues",
+    "min_python_version": [
+        3,
+        7,
+        0
+    ],
+    "name": "weeedcog",
+    "requirements": [],
+    "short": "Create comics from channel messages",
+    "tags": []
+}

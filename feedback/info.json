@@ -1,0 +1,18 @@
+{
+    "author": [
+        "luna"
+    ],
+    "description": "Allows users to submit anonymous feedback to the moderation team of any server that they share with the bot.",
+    "disabled": false,
+    "hidden": false,
+    "install_msg": "Thanks for installing this cog! Please report any issues here: https://github.com/dualmoon/Cogs.v3/issues",
+    "min_python_version": [
+        3,
+        7,
+        0
+    ],
+    "name": "feedback",
+    "requirements": [],
+    "short": "Allows users to submit anonymous feedback.",
+    "tags": []
+}
