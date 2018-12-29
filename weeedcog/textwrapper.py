@@ -1,8 +1,15 @@
+"""
+    Thanks to https://github.com/turicas for this library
+    Turicas posted this class to this gist: https://gist.github.com/turicas/1455973
+    Found posted to stackexchange here: https://stackoverflow.com/questions/7698231/python-pil-draw-multiline-text-on-image
+"""
+
 from PIL import Image, ImageDraw
 
 
 class TextWrapper(object):
-    """ Helper class to wrap text in lines, based on given text, font
+    """
+        Helper class to wrap text in lines, based on given text, font
         and max allowed line width.
     """
 
