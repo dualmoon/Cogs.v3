@@ -1,6 +1,5 @@
 """
-    Thanks to https://github.com/turicas for this library
-    Turicas posted this class to this gist: https://gist.github.com/turicas/1455973
+    Thanks to Igor Pomoaranskiy (https://stackoverflow.com/users/535884/igor-pomaranskiy) for this class
     Found posted to stackexchange here: https://stackoverflow.com/questions/7698231/python-pil-draw-multiline-text-on-image
 """
 
