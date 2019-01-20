@@ -9,6 +9,7 @@ from redbot.core.commands import Context
 
 
 class BandName(commands.Cog):
+    """ Fun cog that randomly turns user messages into band names. """
 
     def __init__(self, red: Red):
         self.bot = red

@@ -52,7 +52,7 @@ class WeeedBot(commands.Cog):
     # worrying about command name collisions
     @commands.group()
     async def weeed(self, ctx: commands.Context):
-        """This is the primary cog group."""
+        """This is the primary cog group. Try ``"""
         pass
 
     @weeed.group(name='set')
@@ -226,7 +226,8 @@ class WeeedBot(commands.Cog):
     async def comic(self, ctx: commands.Context, count: int, message_id: int = None):
         """
             Generates a comic using the last specified number of messages. Can optionally send a message ID as well
-            and it will grab that message and the specified number prior to it.
+            and it will grab that message and the specified number prior to it. If "comic_text" option is set,
+            the comic will be accompanied by that configured text.
         """
         server_cfg = self.config.guild(ctx.guild)
         max_messages = await server_cfg.max_messages()
