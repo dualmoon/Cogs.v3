@@ -11,12 +11,11 @@ from PIL import Image, ImageOps, ImageDraw, ImageFont
 from .textwrapper import TextWrapper
 
 
-class Weeedbot(commands.Cog):
+class WeeedBot(commands.Cog):
 
     """It's weeedbot."""
 
     def __init__(self, red: Red):
-        """My linter wants a docstring in init, idk why."""
         self.bot = red
         # In case anyone's wondering, this is "luna" in binary
         # but with a 9 at the front
@@ -117,7 +116,7 @@ class Weeedbot(commands.Cog):
 
     @wset.command()
     async def comic_text(self, ctx: commands.Context, *, text: str = None):
-        """ Text to accompany the comic when posted, or 'none' """
+        """ Optional text element to accompany the post e.g. "Whoa, here's a comic:", or 'none' """
         if not text:
             current_text = await self.config.guild(ctx.guild).comic_text()
             await ctx.send(f"comic_text is currently {current_text} for this guild.")
@@ -225,6 +224,10 @@ class Weeedbot(commands.Cog):
     # any message and the one prior
     @weeed.command()
     async def comic(self, ctx: commands.Context, count: int, message_id: int = None):
+        """
+            Generates a comic using the last specified number of messages. Can optionally send a message ID as well
+            and it will grab that message and the specified number prior to it.
+        """
         server_cfg = self.config.guild(ctx.guild)
         max_messages = await server_cfg.max_messages()
         background_image = await server_cfg.background_image()

@@ -1,7 +1,6 @@
 from redbot.core import commands, Config, checks
 from redbot.core.bot import Red
 import discord
-import os
 
 
 class SelfAssign(commands.Cog):
@@ -30,12 +29,15 @@ class SelfAssign(commands.Cog):
         if not valid_role:
             await ctx.send(f"Couldn't find a valid role called {role}")
         else:
-            async with self.config.guild(ctx.guild).VALID_ROLE_IDS() as roles:
-                if valid_role.id in roles:
-                    await ctx.send(f"The '{valid_role}' role is already self-assignable")
-                    return
-                roles.append(valid_role.id)
-                await ctx.send(f"The '{valid_role}' role is now self-assignable")
+            if ctx.author.top_role > valid_role:
+                async with self.config.guild(ctx.guild).VALID_ROLE_IDS() as roles:
+                    if valid_role.id in roles:
+                        await ctx.send(f"The '{valid_role}' role is already self-assignable")
+                        return
+                    roles.append(valid_role.id)
+                    await ctx.send(f"The '{valid_role}' role is now self-assignable")
+            else:
+                await ctx.send(f"You do not have permissions to make that role self-assignable.")
 
     @selfassign.command(name="unset")
     @checks.mod()
