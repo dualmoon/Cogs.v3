@@ -1,3 +1,18 @@
 {
-    "hidden": true
+    "author": [
+        "luna"
+    ],
+    "description": "Testing running a web server as a cog",
+    "disabled": false,
+    "hidden": true,
+    "install_msg": "this is really only for testing, don't expect much!",
+    "min_python_version": [
+        3,
+        7,
+        0
+    ],
+    "name": "webthing",
+    "requirements": [],
+    "short": "Testing running a web server as a cog",
+    "tags": []
 }
