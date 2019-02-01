@@ -5,7 +5,7 @@
     "description": "Creates comics with random characters using a string of messages from a channel.",
     "disabled": false,
     "hidden": false,
-    "install_msg": "Thanks for installing this cog! Please report any issues here: https://github.com/dualmoon/Cogs.v3/issues",
+    "install_msg": "Thanks for installing this cog! Please report any issues here: https://github.com/dualmoon/Cogs.v3/issues. This cog comes with bundled data! Specifically, a library of images that are used as the actors in the generated comics.",
     "min_python_version": [
         3,
         7,
