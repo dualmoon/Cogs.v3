@@ -1,7 +1,9 @@
 {
-	"AUTHOR": "luna",
-	"INSTALL_MSG": "luna loves u <3",
-	"NAME": "Cogs.V3",
-	"SHORT": "Cogs by luna",
-	"DESCRIPTION": "Cogs for RED Discord Bot by luna"
+	"author": [
+		"luna"
+	],
+	"install_msg": "luna loves u <3",
+	"name": "Cogs.V3",
+	"short": "Cogs by luna",
+	"description": "Cogs for RED Discord Bot by luna"
 }
