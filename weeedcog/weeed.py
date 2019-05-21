@@ -402,7 +402,7 @@ class WeeedBot(commands.Cog):
         # This would let us debug any weird stuff rendered into comics.
         await ctx.send(
             content=comic_text, file=discord.File(
-                canvas_bytes.getvalue(),
+                canvas_bytes,
                 filename="comic.png"
                 )
             )
