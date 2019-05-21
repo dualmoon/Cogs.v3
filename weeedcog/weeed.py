@@ -403,6 +403,6 @@ class WeeedBot(commands.Cog):
         await ctx.send(
             content=comic_text, file=discord.File(
                 canvas_bytes.getvalue(),
-                filename="weeed.png"
+                filename="comic.png"
                 )
             )
