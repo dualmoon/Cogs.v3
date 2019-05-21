@@ -294,7 +294,7 @@ class WeeedBot(commands.Cog):
         # background with the default being the standard one, and the other
         # option should be to pick a random background and use it for every
         # panel, and maybe even one last option of a random background per panel
-        background = Image.open(f"{self.datapath}/background/{background_image}")
+        background = Image.open(f"{self.datapath}/background/{background_image}").convert("RGBA")
         # Create our Draw object
         draw = ImageDraw.Draw(canvas)
         # This is the top and sides margin size for text and characters
