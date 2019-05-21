@@ -400,6 +400,7 @@ class WeeedBot(commands.Cog):
         # TODO: make the filename a unique hash or something so that we can
         # also store comic data under the same name with a different extension
         # This would let us debug any weird stuff rendered into comics.
+        canvas_bytes.seek(0)
         await ctx.send(
             content=comic_text, file=discord.File(
                 canvas_bytes,
