@@ -250,7 +250,7 @@ class WeeedBot(commands.Cog):
         if message_id:
             # ...see if we can pull a valid message object...
             try:
-                anchor_msg = await ctx.get_message(message_id)
+                anchor_msg = await ctx.fetch_message(message_id)
             # ...and if we can't, throw an error
             # TODO: expand this to actually catch the exceptions this can throw
             except (discord.NotFound, discord.Forbidden, discord.HTTPException) as error:
