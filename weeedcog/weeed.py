@@ -266,9 +266,10 @@ class WeeedBot(commands.Cog):
         else:
             anchor_msg = ctx.message
         # Get the specified number of messages using ctx.history()
-        messages = reversed(await ctx.history(before=anchor_msg,
+        messages = await ctx.history(before=anchor_msg,
                                      limit=count,
-                                     oldest_first=False).flatten())
+                                     oldest_first=False).flatten()
+        messages.reverse()
         # Again, if given a message ID, we need to get the history but also
         # add the message with the ID that was passed and, since we're using
         # reverse=True we append (otherwise we'd prepend)
