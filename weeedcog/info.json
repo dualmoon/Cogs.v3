@@ -12,7 +12,7 @@
         0
     ],
     "name": "weeedcog",
-    "requirements": [],
+    "requirements": ["pillow"],
     "short": "Create comics from channel messages",
     "tags": []
 }
