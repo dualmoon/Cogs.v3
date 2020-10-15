@@ -34,6 +34,7 @@ class BandName(commands.Cog):
         self.blacklist_regex = re.compile(r"^(.\!\w|[^\w])")
 
     async def on_message(self, message):
+        print('bandname bot triggered.')
         if message.author == self.bot.user:
             return
         if type(message.channel) != discord.TextChannel:
