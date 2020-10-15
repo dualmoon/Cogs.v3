@@ -3,6 +3,5 @@ __pycache__/
 .ftpconfig
 .idea/
 .DS_Storea
-.vscode/**/*.*
+.vscode/
 *.code-workspace
-
