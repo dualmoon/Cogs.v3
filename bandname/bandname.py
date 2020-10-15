@@ -12,6 +12,7 @@ class BandName(commands.Cog):
     """ Fun cog that randomly turns user messages into band names. """
 
     def __init__(self, red: Red):
+        print('Initializing BandName..........')
         self.bot = red
         configID = 901101100011101010110111001100001
         self.config = Config.get_conf(self, identifier=configID)
