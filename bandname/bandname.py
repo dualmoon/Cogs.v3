@@ -39,8 +39,10 @@ class BandName(commands.Cog):
     async def on_message(self, message):
         print('bandname bot triggered.')
         if message.author == self.bot.user:
+            print('ignoring messages from other bots')
             return
         if type(message.channel) != discord.TextChannel:
+            print('messages not coming from a normal text channel, ignoring')
             return
         # TODO: reorder these so that the most common disqualifiers are checked first
         # check for channel or server blacklisted, etc
@@ -58,10 +60,12 @@ class BandName(commands.Cog):
             return
         # make sure the message is of the appropriate length
         if 1 < len(message.content.split()) < 7:
+            print('about to actually try to trigger bandname')
             # actually do the deal
             p_mod = await guild_config.p_mod()
             roll = random()*1000
             if roll+p_mod > 999:
+                print('bandname message HIT')
                 # pick a random genre
                 genres = await self.config.genres()
                 genre = choice(genres)
@@ -70,6 +74,7 @@ class BandName(commands.Cog):
                 await message.channel.send(f"\"{band}\" is the name of my new {genre} band")
                 await guild_config.p_mod.set(0)
             else:
+                print('bandname message MISS')
                 p_scale = await guild_config.p_scale()
                 await guild_config.p_mod.set(p_mod+p_scale)
 
