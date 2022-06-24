@@ -34,6 +34,7 @@ class BandName(commands.Cog):
         self.blacklists = ["http", "www", "@", '#']
         self.blacklist_regex = re.compile(r"^(.\!\w|[^\w])")
 
+    @commands.Cog.listener()
     async def on_message(self, message):
         print('bandname bot triggered.')
         if message.author == self.bot.user:
@@ -55,7 +56,7 @@ class BandName(commands.Cog):
         if any(x in self.blacklists for x in message.content) or self.blacklist_regex.match(message.content):
             return
         # make sure the message is of the appropriate length
-        if 1 < len(message.content.split()) < 5:
+        if 1 < len(message.content.split()) < 7:
             # actually do the deal
             p_mod = await guild_config.p_mod()
             roll = random()*1000
