@@ -13,6 +13,7 @@ class BandName(commands.Cog):
 
     def __init__(self, red: Red):
         print('Initializing BandName..........')
+        super().__init__()
         self.bot = red
         configID = 901101100011101010110111001100001
         self.config = Config.get_conf(self, identifier=configID)
