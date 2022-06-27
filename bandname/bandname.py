@@ -57,6 +57,7 @@ class BandName(commands.Cog):
             return
         # roughshod list that should exclude urls, mentions, channels
         if any(x in self.blacklists for x in message.content) or self.blacklist_regex.match(message.content):
+            print('skipping due to blacklist in bandname trigger message')
             return
         # make sure the message is of the appropriate length
         if 1 < len(message.content.split()) < 7:
