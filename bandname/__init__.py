@@ -1,6 +1,6 @@
 from .bandname import BandName
 
 
-def setup(bot):
+async def setup(bot):
     cog = BandName(bot)
-    bot.add_cog(cog)
+    await bot.add_cog(cog)
