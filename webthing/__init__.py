@@ -1,5 +1,5 @@
 from .webthing import WebThing
 
-def setup(bot):
+async def setup(bot):
     cog = WebThing(bot)
-    bot.add_cog(cog)
+    await bot.add_cog(cog)
