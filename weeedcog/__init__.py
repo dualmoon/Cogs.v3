@@ -3,6 +3,6 @@ from redbot.core import data_manager
 from shutil import rmtree
 
 
-def setup(bot):
+async def setup(bot):
     cog = WeeedBot(bot)
-    bot.add_cog(cog)
+    await bot.add_cog(cog)
